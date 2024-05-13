@@ -17,6 +17,10 @@ let SPEED_FLUSH = 3;
 let Y_GROUND;
 let lastFR;
 
+const limit = 60; // Time limit in seconds
+let startTime;
+let state;
+
 function preload() {
   // make sure they exist in the sketch folder
   images.push(loadImage("doll1.svg"));
@@ -51,6 +55,8 @@ function setup() {
 
   Y_GROUND = (height / 20) * 19;
   lastFR = FRAME_RATE;
+  
+  state = 0;
 }
 
 function windowResized() {
@@ -73,6 +79,7 @@ function draw() {
     if (balls.length === 0) {
       isFlushing = false;
     }
+    
   }
 
   balls.forEach((ball) => {
@@ -84,7 +91,8 @@ function draw() {
 
   if (mouseIsPressed) {
     let ballDiameter;
-
+    
+    
     if (isBallDiameterRandom) {
       ballDiameter = random(25, 150);
     } else {
@@ -104,6 +112,7 @@ function draw() {
         balls.push(newBall);
       }
     }
+
   }
 
   drawGround();
@@ -112,7 +121,10 @@ function draw() {
     displayShortcuts();
     displayFrameRate();
     displayBallCount();
+    displayTime();
   }
+  
+  
 }
 
 function mouseReleased() {
@@ -141,6 +153,8 @@ function keyPressed() {
     //H
     displayWeight = !displayWeight;
   }
+  
+  
 }
 
 function canAddBall(x, y, d) {
@@ -185,11 +199,34 @@ function displayBallCount() {
   textFont(myFontB);
   textSize(50);
   fill(255, 0, 0);
-  text(balls.length, 10, 50);
+  // text(balls.length, width / 2, 50);
+  text(balls.length, 70, 50);
   let twBalls = textWidth(balls.length);
   textFont(myFontR);
-  textSize(25);
-  text("matryoshkas", 15 + twBalls, 50);
+  textSize(14);
+  text("matryoshkas", twBalls+110, 60);
+}
+
+function displayTime() {
+  textFont(myFontB);
+  textSize(150);
+  fill(255, 0, 0);
+  textAlign(CENTER, CENTER);
+    
+  if (state == 0) {
+    text("Click to start", width / 2, height / 2);
+  } else if (state == 1) {
+    let ellapsedTime = (millis() - startTime) / 1000;
+    if (ellapsedTime > limit) {
+      state = 2;
+    } else {
+      let remainingTime = limit - ellapsedTime;
+      text(floor(remainingTime), width / 2, height / 2);
+    }
+  } else if (state == 2) {
+    text("Game Over", width / 2, height / 2);
+  }
+  
 }
 
 function displayShortcuts() {
@@ -235,6 +272,11 @@ function mouseClicked() {
   if (!isSongPlaying) {
     mySong.play();
     isSongPlaying = true;
+  }
+  
+  if (state == 0) {
+    startTime = millis();
+    state = 1;
   }
 }
 
